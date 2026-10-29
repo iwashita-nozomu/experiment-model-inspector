@@ -20,27 +20,37 @@ The function called `linear` suggests a prediction step, but no implementation i
 
 ```mermaid
 flowchart LR
-  n0["input: Input reference"]
-  n1["preprocess: Preprocessing call"]
-  n2["parameter: Weights role inferred"]
-  n3["model: Prediction call"]
-  n4["input: Targets origin unknown"]
-  n5["operation: Prediction minus targets"]
-  n6["parameter: Coefficient sign unknown"]
-  n7["loss: Squared residual objective inferred"]
-  n8["evaluation: Absolute residual score inferred"]
-  n9["output: Only score passed to output"]
-  n0 -->|feeds| n1
-  n1 -->|feeds| n3
-  n2 -->|uses| n3
-  n3 -->|feeds| n5
-  n4 -->|feeds| n5
-  n5 -->|feeds| n7
-  n2 -->|uses| n7
-  n6 -->|uses| n7
-  n5 -->|evaluates| n8
-  n8 -->|produces| n9
+  node_features["preprocess: Preprocessing call"]
+  node_loss["loss: Squared residual objective inferred"]
+  node_metrics["output: Only score passed to output"]
+  node_penalty["parameter: Coefficient sign unknown"]
+  node_prediction["model: Prediction call"]
+  node_residual["operation: Prediction minus targets"]
+  node_samples["input: Input reference"]
+  node_score["evaluation: Absolute residual score inferred"]
+  node_targets["input: Targets origin unknown"]
+  node_weights["parameter: Weights role inferred"]
+  node_features -->|feeds| node_prediction
+  node_penalty -->|uses| node_loss
+  node_prediction -->|feeds| node_residual
+  node_residual -->|evaluates| node_score
+  node_residual -->|feeds| node_loss
+  node_samples -->|feeds| node_features
+  node_score -->|produces| node_metrics
+  node_targets -->|feeds| node_residual
+  node_weights -->|uses| node_loss
+  node_weights -->|uses| node_prediction
 ```
+
+The caption joins the explanation and figure by candidate ID, not display order:
+
+| Candidate / figure ID | Reading | Evidence |
+| --- | --- | --- |
+| `loss` / `node_loss` | Squared residual objective, inferred | `train.py:5–6` |
+| `score` / `node_score` | Absolute residual score, inferred | `train.py:5,7` |
+| `metrics` / `node_metrics` | Only score is passed to the observed output call; output role inferred | `train.py:8` |
+
+A later request to reword the loss explanation can retain `loss` and its evidence caption. Re-observe and re-verify before changing a mathematical interpretation; do not retain a source-stale node just to preserve a visual anchor. Native layout can still move elements.
 
 ## Counterexample and unknowns
 
