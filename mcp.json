@@ -3,7 +3,7 @@
   "mcpServers": {
     "experiment-model-inspector": {
       "type": "stdio",
-      "command": "${PLUGIN_ROOT}/bin/experiment-model-inspector",
+      "command": "./bin/experiment-model-inspector",
       "args": [
         "mcp"
       ],
