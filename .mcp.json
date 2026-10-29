@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "experiment-model-inspector": {
-      "command": "${PLUGIN_ROOT}/bin/experiment-model-inspector",
+      "command": "./bin/experiment-model-inspector",
       "args": [
         "mcp"
       ],

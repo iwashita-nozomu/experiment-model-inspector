@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "experiment-model-inspector",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Static evidence-linked experiment model and data-flow inspection.",
   "author": {
     "name": "iwashita-nozomu",
