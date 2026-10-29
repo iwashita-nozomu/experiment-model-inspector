@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "experiment-model-inspector": {
+      "type": "stdio",
+      "command": "${PLUGIN_ROOT}/bin/experiment-model-inspector",
+      "args": [
+        "mcp"
+      ],
+      "cwd": "${PLUGIN_ROOT}"
+    }
+  }
+}

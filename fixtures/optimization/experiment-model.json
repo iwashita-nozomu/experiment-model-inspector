@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "sources": [
+    "optimize.cpp"
+  ],
+  "nodes": [
+    {
+      "id": "x",
+      "kind": "variable",
+      "label": "Decision variable",
+      "evidence": [
+        {
+          "file": "optimize.cpp",
+          "line": 2,
+          "exact": "double residual = x - target;"
+        }
+      ]
+    },
+    {
+      "id": "lambda",
+      "kind": "parameter",
+      "label": "Regularization parameter",
+      "evidence": [
+        {
+          "file": "optimize.cpp",
+          "line": 3,
+          "exact": "double loss = residual * residual + lambda * x * x;"
+        }
+      ]
+    },
+    {
+      "id": "loss",
+      "kind": "loss",
+      "label": "Quadratic objective",
+      "evidence": [
+        {
+          "file": "optimize.cpp",
+          "line": 3,
+          "exact": "double loss = residual * residual + lambda * x * x;"
+        }
+      ],
+      "interpretation": {
+        "expression": "L(x) = (x - target)^2 + lambda*x^2",
+        "confidence": 0.8
+      }
+    },
+    {
+      "id": "constraint",
+      "kind": "constraint",
+      "label": "Nonnegative feasible set",
+      "evidence": [
+        {
+          "file": "optimize.cpp",
+          "line": 4,
+          "exact": "bool feasible = x >= 0.0;"
+        }
+      ],
+      "interpretation": {
+        "expression": "x >= 0",
+        "confidence": 0.8
+      }
+    },
+    {
+      "id": "update",
+      "kind": "operation",
+      "label": "Gradient step",
+      "evidence": [
+        {
+          "file": "optimize.cpp",
+          "line": 5,
+          "exact": "x = x - step * (2.0 * residual + 2.0 * lambda * x);"
+        }
+      ],
+      "interpretation": {
+        "expression": "x_next = x - step*dL/dx",
+        "confidence": 0.8
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "x",
+      "to": "loss",
+      "relation": "uses",
+      "evidence": [
+        {
+          "file": "optimize.cpp",
+          "line": 3,
+          "exact": "double loss = residual * residual + lambda * x * x;"
+        }
+      ]
+    },
+    {
+      "from": "lambda",
+      "to": "loss",
+      "relation": "uses",
+      "evidence": [
+        {
+          "file": "optimize.cpp",
+          "line": 3,
+          "exact": "double loss = residual * residual + lambda * x * x;"
+        }
+      ]
+    },
+    {
+      "from": "constraint",
+      "to": "x",
+      "relation": "constrains",
+      "evidence": [
+        {
+          "file": "optimize.cpp",
+          "line": 4,
+          "exact": "bool feasible = x >= 0.0;"
+        }
+      ]
+    },
+    {
+      "from": "loss",
+      "to": "update",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "optimize.cpp",
+          "line": 5,
+          "exact": "x = x - step * (2.0 * residual + 2.0 * lambda * x);"
+        }
+      ]
+    },
+    {
+      "from": "update",
+      "to": "x",
+      "relation": "updates",
+      "evidence": [
+        {
+          "file": "optimize.cpp",
+          "line": 5,
+          "exact": "x = x - step * (2.0 * residual + 2.0 * lambda * x);"
+        }
+      ]
+    }
+  ]
+}

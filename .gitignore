@@ -1,0 +1,5 @@
+/target/
+/dist/
+/local-evidence/
+*.log
+.DS_Store

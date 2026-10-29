@@ -1,0 +1,34 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "experiment-model-inspector",
+  "version": "0.1.0",
+  "description": "Static evidence-linked experiment model and data-flow inspection.",
+  "author": {
+    "name": "iwashita-nozomu",
+    "url": "https://github.com/iwashita-nozomu"
+  },
+  "homepage": "https://github.com/iwashita-nozomu/experiment-model-inspector",
+  "repository": "https://github.com/iwashita-nozomu/experiment-model-inspector",
+  "license": "MIT",
+  "keywords": [
+    "experiments",
+    "mathematics",
+    "data-flow",
+    "read-only",
+    "codex",
+    "mcp"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Experiment Model Inspector",
+        "shortDescription": "Inspect experiment models",
+        "longDescription": "Read explicit local model declarations, verify source lines, and show mathematical interpretations and metadata-only data flow with coverage limits. No code execution or dataset loading.",
+        "developerName": "iwashita-nozomu",
+        "category": "Productivity",
+        "capabilities": [],
+        "defaultPrompt": "Inspect the model and data flow of an authorized experiment using its evidence manifest."
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "sources": [
+    "kernel.cu"
+  ],
+  "nodes": [
+    {
+      "id": "state",
+      "kind": "state",
+      "label": "State array",
+      "evidence": [
+        {
+          "file": "kernel.cu",
+          "line": 4,
+          "exact": "    state[i] = state[i] - step * grad[i];"
+        }
+      ],
+      "metadata": {
+        "shape": "unknown"
+      }
+    },
+    {
+      "id": "update",
+      "kind": "operation",
+      "label": "Kernel update",
+      "evidence": [
+        {
+          "file": "kernel.cu",
+          "line": 4,
+          "exact": "    state[i] = state[i] - step * grad[i];"
+        }
+      ],
+      "interpretation": {
+        "expression": "state_i_next = state_i - step*grad_i",
+        "confidence": 0.8
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "update",
+      "to": "state",
+      "relation": "updates",
+      "evidence": [
+        {
+          "file": "kernel.cu",
+          "line": 4,
+          "exact": "    state[i] = state[i] - step * grad[i];"
+        }
+      ]
+    }
+  ]
+}

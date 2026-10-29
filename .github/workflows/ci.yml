@@ -1,0 +1,43 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            label: macos-arm64
+            binary: target/release/experiment-model-inspector
+          - os: ubuntu-24.04
+            label: linux-x64
+            binary: target/release/experiment-model-inspector
+          - os: windows-2022
+            label: windows-x64
+            binary: target/release/experiment-model-inspector.exe
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Rust toolchain
+        run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy
+      - run: cargo +stable fmt --check
+      - run: cargo +stable clippy --locked --all-targets -- -D warnings
+      - run: cargo +stable test --locked
+      - run: cargo +stable build --release --locked
+      - run: python scripts/smoke.py ${{ matrix.binary }}
+      - run: python scripts/licenses.py
+      - run: python scripts/package.py ${{ matrix.label }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: github.event_name == 'push'
+        with:
+          name: plugin-${{ matrix.label }}
+          path: dist/*
+          retention-days: 7

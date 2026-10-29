@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "sources": [
+    "process.rs"
+  ],
+  "nodes": [
+    {
+      "id": "state",
+      "kind": "state",
+      "label": "Current state",
+      "evidence": [
+        {
+          "file": "process.rs",
+          "line": 2,
+          "exact": "let drift = -theta * state;"
+        }
+      ],
+      "metadata": {
+        "units": "unknown"
+      }
+    },
+    {
+      "id": "noise",
+      "kind": "input",
+      "label": "Externally supplied noise",
+      "evidence": [
+        {
+          "file": "process.rs",
+          "line": 3,
+          "exact": "let next_state = state + drift * dt + sigma * supplied_noise;"
+        }
+      ]
+    },
+    {
+      "id": "drift",
+      "kind": "operation",
+      "label": "Drift term",
+      "evidence": [
+        {
+          "file": "process.rs",
+          "line": 2,
+          "exact": "let drift = -theta * state;"
+        }
+      ],
+      "interpretation": {
+        "expression": "b(x) = -theta*x",
+        "confidence": 0.8
+      }
+    },
+    {
+      "id": "next",
+      "kind": "state",
+      "label": "Next state",
+      "evidence": [
+        {
+          "file": "process.rs",
+          "line": 3,
+          "exact": "let next_state = state + drift * dt + sigma * supplied_noise;"
+        }
+      ],
+      "interpretation": {
+        "expression": "x_next = x - theta*x*dt + sigma*noise",
+        "confidence": 0.8
+      }
+    },
+    {
+      "id": "error",
+      "kind": "evaluation",
+      "label": "Absolute error",
+      "evidence": [
+        {
+          "file": "process.rs",
+          "line": 4,
+          "exact": "let error = (next_state - reference).abs();"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "state",
+      "to": "drift",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "process.rs",
+          "line": 2,
+          "exact": "let drift = -theta * state;"
+        }
+      ]
+    },
+    {
+      "from": "drift",
+      "to": "next",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "process.rs",
+          "line": 3,
+          "exact": "let next_state = state + drift * dt + sigma * supplied_noise;"
+        }
+      ]
+    },
+    {
+      "from": "noise",
+      "to": "next",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "process.rs",
+          "line": 3,
+          "exact": "let next_state = state + drift * dt + sigma * supplied_noise;"
+        }
+      ]
+    },
+    {
+      "from": "next",
+      "to": "state",
+      "relation": "updates",
+      "evidence": [
+        {
+          "file": "process.rs",
+          "line": 3,
+          "exact": "let next_state = state + drift * dt + sigma * supplied_noise;"
+        }
+      ]
+    },
+    {
+      "from": "next",
+      "to": "error",
+      "relation": "evaluates",
+      "evidence": [
+        {
+          "file": "process.rs",
+          "line": 4,
+          "exact": "let error = (next_state - reference).abs();"
+        }
+      ]
+    }
+  ]
+}

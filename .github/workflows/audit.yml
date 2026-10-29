@@ -1,0 +1,19 @@
+name: Dependency audit
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '11 6 * * *'
+permissions:
+  contents: read
+jobs:
+  rustsec:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - run: cargo install cargo-audit --locked --version 0.22.2
+      - run: cargo audit --deny warnings

@@ -1,0 +1,6 @@
+interface:
+  display_name: Experiment Model Inspector
+  short_description: Inspect evidence-linked models
+  default_prompt: Inspect the mathematical model and metadata-only data flow of my explicitly authorized experiment.
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,180 @@
+{
+  "version": 1,
+  "sources": [
+    "train.py"
+  ],
+  "nodes": [
+    {
+      "id": "samples",
+      "kind": "input",
+      "label": "Training data reference",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 2,
+          "exact": "samples = load_csv(\"data/synthetic.csv\")"
+        }
+      ],
+      "metadata": {
+        "path_reference": "data/synthetic.csv",
+        "format": "CSV",
+        "shape": "unknown",
+        "schema": "unknown"
+      }
+    },
+    {
+      "id": "features",
+      "kind": "preprocess",
+      "label": "Normalization",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 3,
+          "exact": "features = normalize(samples)"
+        }
+      ]
+    },
+    {
+      "id": "weights",
+      "kind": "parameter",
+      "label": "Model weights",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 4,
+          "exact": "prediction = model(features, weights)"
+        }
+      ]
+    },
+    {
+      "id": "prediction",
+      "kind": "model",
+      "label": "Model prediction",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 4,
+          "exact": "prediction = model(features, weights)"
+        }
+      ]
+    },
+    {
+      "id": "loss",
+      "kind": "loss",
+      "label": "Mean square expression",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 5,
+          "exact": "loss = mean((prediction - targets) ** 2)"
+        }
+      ],
+      "interpretation": {
+        "expression": "L = mean((prediction - targets)^2)",
+        "confidence": 0.8
+      }
+    },
+    {
+      "id": "score",
+      "kind": "evaluation",
+      "label": "Evaluation",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 6,
+          "exact": "score = evaluate(prediction, targets)"
+        }
+      ]
+    },
+    {
+      "id": "output",
+      "kind": "output",
+      "label": "Metrics reference",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 7,
+          "exact": "save_metrics(score, \"results/metrics.json\")"
+        }
+      ],
+      "metadata": {
+        "path_reference": "results/metrics.json",
+        "format": "JSON"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "samples",
+      "to": "features",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 3,
+          "exact": "features = normalize(samples)"
+        }
+      ]
+    },
+    {
+      "from": "features",
+      "to": "prediction",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 4,
+          "exact": "prediction = model(features, weights)"
+        }
+      ]
+    },
+    {
+      "from": "weights",
+      "to": "prediction",
+      "relation": "uses",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 4,
+          "exact": "prediction = model(features, weights)"
+        }
+      ]
+    },
+    {
+      "from": "prediction",
+      "to": "loss",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 5,
+          "exact": "loss = mean((prediction - targets) ** 2)"
+        }
+      ]
+    },
+    {
+      "from": "prediction",
+      "to": "score",
+      "relation": "evaluates",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 6,
+          "exact": "score = evaluate(prediction, targets)"
+        }
+      ]
+    },
+    {
+      "from": "score",
+      "to": "output",
+      "relation": "produces",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 7,
+          "exact": "save_metrics(score, \"results/metrics.json\")"
+        }
+      ]
+    }
+  ]
+}

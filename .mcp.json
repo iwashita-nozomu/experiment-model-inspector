@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "experiment-model-inspector": {
+      "command": "${PLUGIN_ROOT}/bin/experiment-model-inspector",
+      "args": [
+        "mcp"
+      ],
+      "cwd": "${PLUGIN_ROOT}"
+    }
+  }
+}
