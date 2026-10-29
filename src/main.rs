@@ -1,4 +1,6 @@
-use experiment_model_inspector::{VERSION, inspect, rpc};
+use experiment_model_inspector::{
+    SourceSlice, VERSION, inspect, inspect_candidate, observe_sources, rpc,
+};
 use serde_json::json;
 use std::{
     io::{self, BufRead, Read, Write},
@@ -16,12 +18,51 @@ fn main() {
                 std::process::exit(1);
             }
         },
+        Some("observe") if a.len() == 5 => {
+            let range = a[3]
+                .parse()
+                .and_then(|start_line| a[4].parse().map(|end_line| (start_line, end_line)));
+            let result = match range {
+                Ok((start_line, end_line)) => observe_sources(
+                    Path::new(&a[1]),
+                    &[SourceSlice {
+                        file: a[2].clone(),
+                        start_line,
+                        end_line,
+                    }],
+                ),
+                Err(_) => Err("line_range_limit".into()),
+            };
+            emit(result);
+        }
+        Some("inspect-candidate") if a.len() == 2 => {
+            let mut raw = Vec::new();
+            let result = match io::stdin().take(262_145).read_to_end(&mut raw) {
+                Err(_) => Err("read_failed".into()),
+                Ok(_) if raw.len() > 262_144 => Err("candidate_size_limit".into()),
+                Ok(_) => match serde_json::from_slice(&raw) {
+                    Ok(candidate) => inspect_candidate(Path::new(&a[1]), candidate),
+                    Err(_) => Err("invalid_manifest".into()),
+                },
+            };
+            emit(result);
+        }
         Some("--version") => println!("experiment-model-inspector {VERSION}"),
         _ => {
             eprintln!(
-                "Usage: experiment-model-inspector inspect ROOT RELATIVE_MANIFEST.json | mcp | --version"
+                "Usage: experiment-model-inspector inspect ROOT MANIFEST.json | observe ROOT SOURCE START END | inspect-candidate ROOT < candidate.json | mcp | --version"
             );
             std::process::exit(2);
+        }
+    }
+}
+
+fn emit(result: Result<serde_json::Value, String>) {
+    match result {
+        Ok(v) => println!("{}", serde_json::to_string_pretty(&v).unwrap()),
+        Err(e) => {
+            println!("{}", json!({"schema_version":"1.0","error":e}));
+            std::process::exit(1);
         }
     }
 }
