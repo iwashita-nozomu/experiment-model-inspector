@@ -329,3 +329,21 @@ fn mcp_discovery_initialization_calls_and_errors() {
         -32601
     );
 }
+
+#[test]
+fn malformed_envelopes_are_invalid_requests_not_notifications() {
+    let fixtures: Value =
+        serde_json::from_str(include_str!("fixtures/malformed-requests.json")).unwrap();
+    for request in fixtures["invalid"].as_array().unwrap() {
+        let response = rpc(request.clone()).expect("invalid envelope needs an error response");
+        assert_eq!(response["error"]["code"], -32600, "{request}");
+        assert_eq!(response["id"], Value::Null, "{request}");
+        assert!(response.get("result").is_none());
+    }
+    for request in fixtures["notifications"].as_array().unwrap() {
+        assert!(rpc(request.clone()).is_none(), "{request}");
+    }
+    let unknown = rpc(json!({"jsonrpc":"2.0","method":"unknown","id":"request-id"})).unwrap();
+    assert_eq!(unknown["error"]["code"], -32601);
+    assert_eq!(unknown["id"], "request-id");
+}

@@ -33,6 +33,12 @@ for example in ["optimization", "stochastic", "learning", "cuda"]:
 # Framing, malformed input and notification behavior.
 malformed = subprocess.run([str(binary), "mcp"], input="invalid\n" + json.dumps({"jsonrpc":"2.0","id":5,"method":"ping"}) + "\n", text=True, capture_output=True, timeout=15, check=True)
 assert [json.loads(x).get("error", {}).get("code") for x in malformed.stdout.splitlines()] == [-32700, None]
+envelopes = json.loads((root / "tests/fixtures/malformed-requests.json").read_text())
+requests = envelopes["invalid"] + envelopes["notifications"]
+validation = subprocess.run([str(binary), "mcp"], input="\n".join(map(json.dumps, requests)) + "\n", text=True, capture_output=True, timeout=15, check=True)
+responses = [json.loads(line) for line in validation.stdout.splitlines()]
+assert len(responses) == len(envelopes["invalid"])
+assert all(r["error"]["code"] == -32600 and r["id"] is None for r in responses)
 oversize = subprocess.run([str(binary), "mcp"], input="x" * 1048577, text=True, capture_output=True, timeout=15, check=True)
 assert not oversize.stdout
 print("PASS: CLI fixtures, MCP initialize/list/call/errors/notifications/framing, no dataset reads")
