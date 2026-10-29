@@ -56,6 +56,11 @@
           "file": "process.rs",
           "line": 3,
           "exact": "let next_state = state + drift * dt + sigma * supplied_noise;"
+        },
+        {
+          "file": "process.rs",
+          "line": 2,
+          "exact": "let drift = -theta * state;"
         }
       ],
       "interpretation": {

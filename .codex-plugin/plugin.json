@@ -1,6 +1,6 @@
 {
   "name": "experiment-model-inspector",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Static evidence-linked experiment model and data-flow inspection.",
   "author": {
     "name": "iwashita-nozomu",

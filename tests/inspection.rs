@@ -64,6 +64,110 @@ fn changed_source_invalidates_claims() {
     assert!(report["nodes"].as_array().unwrap().is_empty());
     assert!(report["interpretations"].as_array().unwrap().is_empty());
 }
+
+fn report_after_upstream_change(example: &str, before: &str, after: &str) -> Value {
+    let t = Scratch::new();
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("fixtures")
+        .join(example);
+    let manifest: Value =
+        serde_json::from_str(&fs::read_to_string(root.join("experiment-model.json")).unwrap())
+            .unwrap();
+    let file = manifest["sources"][0].as_str().unwrap();
+    let source = fs::read_to_string(root.join(file)).unwrap();
+    fs::write(t.0.join(file), &source).unwrap();
+    assert_eq!(
+        t.run(&manifest).unwrap()["status"],
+        "complete_for_declared_scope"
+    );
+    assert_eq!(source.matches(before).count(), 1);
+    let changed = source.replacen(before, after, 1);
+    // Change only the upstream definition; every downstream use stays identical.
+    assert_eq!(
+        source.lines().skip(2).collect::<Vec<_>>(),
+        changed.lines().skip(2).collect::<Vec<_>>()
+    );
+    fs::write(t.0.join(file), changed).unwrap();
+    t.run(&manifest).unwrap()
+}
+
+#[test]
+fn upstream_residual_change_invalidates_expanded_loss_and_gradient() {
+    let report = report_after_upstream_change(
+        "optimization",
+        "double residual = x - target;",
+        "double residual = x + target;",
+    );
+    assert_eq!(report["status"], "partial");
+    for node in ["loss", "update"] {
+        assert!(
+            report["issues"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|i| i["code"] == "evidence_mismatch" && i["node"] == node)
+        );
+        assert!(
+            report["interpretations"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|i| i["node"] != node)
+        );
+        assert!(
+            report["nodes"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|n| n["id"] != node)
+        );
+        assert!(
+            report["edges"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|e| e["from"] != node && e["to"] != node)
+        );
+    }
+}
+
+#[test]
+fn upstream_drift_change_invalidates_expanded_recurrence() {
+    let report = report_after_upstream_change(
+        "stochastic",
+        "let drift = -theta * state;",
+        "let drift = theta * state;",
+    );
+    assert_eq!(report["status"], "partial");
+    assert!(
+        report["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|i| i["code"] == "evidence_mismatch" && i["node"] == "next")
+    );
+    assert!(
+        report["interpretations"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|i| i["node"] != "next")
+    );
+    assert!(
+        report["nodes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|n| n["id"] != "next")
+    );
+    assert!(
+        report["edges"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|e| e["from"] != "next" && e["to"] != "next")
+    );
+}
 #[test]
 fn semantic_claims_are_never_presented_as_observations() {
     let t = Scratch::new();
