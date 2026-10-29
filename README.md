@@ -2,7 +2,7 @@
 
 A local Rust CLI and Codex stdio MCP plugin for **source-linked mathematical model and metadata-only data-flow descriptions**. MIT. No HTTP server, WebView, AI API, credentials, code execution, or dataset loading.
 
-The initial version uses an explicit JSON evidence manifest. It verifies literal source lines in Python, C++, CUDA and Rust, then returns an author-declared graph, observed source text, inferred mathematical interpretations, limitations and unknowns. It does not claim to turn arbitrary programs into equations. Source equality is not semantic or mathematical proof. General code ownership/dependency graphs are outside its scope.
+The initial version uses an explicit JSON evidence manifest. It verifies literal source lines in Python, C++, CUDA and Rust, then returns an author-declared graph, observed source text, inferred mathematical interpretations, limitations and unknowns. It does not claim to turn arbitrary programs into equations. Source equality is not semantic or mathematical proof. **The manifest author must list every source definition on which an interpretation depends**, including upstream definitions substituted into an expanded equation. The inspector checks only the supplied evidence lines; it does not discover omitted dependencies or guarantee freshness when an unlisted definition changes. For example, expanding `residual` in a loss requires the residual definition as well as the loss line. Keep expressions unexpanded or split them into smaller claims when the four-evidence-record limit cannot cover their dependencies. General code ownership/dependency graphs are outside its scope.
 
 ## Try it
 

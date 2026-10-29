@@ -37,6 +37,11 @@
           "file": "optimize.cpp",
           "line": 3,
           "exact": "double loss = residual * residual + lambda * x * x;"
+        },
+        {
+          "file": "optimize.cpp",
+          "line": 2,
+          "exact": "double residual = x - target;"
         }
       ],
       "interpretation": {
@@ -69,6 +74,16 @@
           "file": "optimize.cpp",
           "line": 5,
           "exact": "x = x - step * (2.0 * residual + 2.0 * lambda * x);"
+        },
+        {
+          "file": "optimize.cpp",
+          "line": 2,
+          "exact": "double residual = x - target;"
+        },
+        {
+          "file": "optimize.cpp",
+          "line": 3,
+          "exact": "double loss = residual * residual + lambda * x * x;"
         }
       ],
       "interpretation": {

@@ -2,7 +2,7 @@
 
 `experiment-model.json` is a small, explicit, reviewable model description. The tool does **not** infer a full model from arbitrary source. It checks exact lines in declared C++/CUDA/Python/Rust files. It can describe declarations from an experiment configuration, but does not independently parse arbitrary config formats.
 
-Start with `fixtures/learning/experiment-model.json`. Paths are relative to the authorized root. Line numbers are 1-based. `exact` contains the whole source line (including indentation, without the line terminator). LF and CRLF are supported. A mismatch removes the node and its interpretations/connected edges and reports partial coverage. An edge needs evidence of its own.
+Start with `fixtures/learning/experiment-model.json`. Paths are relative to the authorized root. Line numbers are 1-based. `exact` contains the whole source line (including indentation, without the line terminator). LF and CRLF are supported. A mismatch removes the node and its interpretations/connected edges and reports partial coverage. An edge needs evidence of its own. The author must include all upstream definitions used by each interpretation in that node's evidence. The tool verifies only those listed lines and cannot detect missing dependencies. An unchanged use line does not keep an expanded expression fresh if an unlisted definition changes. The optimization fixture lists both residual and loss definitions (and the update line for the gradient interpretation); the stochastic recurrence lists both drift and next-state lines. Stay within four records by leaving expressions unexpanded or splitting claims.
 
 ```json
 {
