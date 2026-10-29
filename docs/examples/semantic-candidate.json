@@ -1,0 +1,283 @@
+{
+  "version": 1,
+  "sources": [
+    "train.py"
+  ],
+  "nodes": [
+    {
+      "id": "samples",
+      "kind": "input",
+      "label": "Input reference",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 2,
+          "exact": "samples = load_csv(\"data/synthetic.csv\")"
+        }
+      ],
+      "metadata": {
+        "path_reference": "data/synthetic.csv"
+      }
+    },
+    {
+      "id": "features",
+      "kind": "preprocess",
+      "label": "Preprocessing call",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 3,
+          "exact": "features = center(samples)"
+        }
+      ]
+    },
+    {
+      "id": "weights",
+      "kind": "parameter",
+      "label": "Weights role inferred",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 4,
+          "exact": "prediction = linear(features, weights)"
+        },
+        {
+          "file": "train.py",
+          "line": 6,
+          "exact": "loss = mean(residual * residual) + penalty * sum(weights * weights)"
+        }
+      ]
+    },
+    {
+      "id": "prediction",
+      "kind": "model",
+      "label": "Prediction call",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 4,
+          "exact": "prediction = linear(features, weights)"
+        }
+      ]
+    },
+    {
+      "id": "targets",
+      "kind": "input",
+      "label": "Targets origin unknown",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 5,
+          "exact": "residual = prediction - targets"
+        }
+      ]
+    },
+    {
+      "id": "residual",
+      "kind": "operation",
+      "label": "Prediction minus targets",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 5,
+          "exact": "residual = prediction - targets"
+        }
+      ],
+      "interpretation": {
+        "expression": "r = prediction - targets, inferred under ordinary arithmetic",
+        "confidence": 0.7
+      }
+    },
+    {
+      "id": "penalty",
+      "kind": "parameter",
+      "label": "Coefficient sign unknown",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 6,
+          "exact": "loss = mean(residual * residual) + penalty * sum(weights * weights)"
+        }
+      ]
+    },
+    {
+      "id": "loss",
+      "kind": "loss",
+      "label": "Squared residual objective inferred",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 5,
+          "exact": "residual = prediction - targets"
+        },
+        {
+          "file": "train.py",
+          "line": 6,
+          "exact": "loss = mean(residual * residual) + penalty * sum(weights * weights)"
+        }
+      ],
+      "interpretation": {
+        "expression": "L = mean(r^2) + penalty*sum(weights^2), inferred under ordinary arithmetic",
+        "confidence": 0.7
+      }
+    },
+    {
+      "id": "score",
+      "kind": "evaluation",
+      "label": "Absolute residual score inferred",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 5,
+          "exact": "residual = prediction - targets"
+        },
+        {
+          "file": "train.py",
+          "line": 7,
+          "exact": "score = mean(abs(residual))"
+        }
+      ],
+      "interpretation": {
+        "expression": "score = mean(abs(r)), inferred under ordinary arithmetic",
+        "confidence": 0.7
+      }
+    },
+    {
+      "id": "metrics",
+      "kind": "output",
+      "label": "Only score passed to output",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 8,
+          "exact": "save_metrics(score, \"results/metrics.json\")"
+        }
+      ],
+      "metadata": {
+        "path_reference": "results/metrics.json"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "samples",
+      "to": "features",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 3,
+          "exact": "features = center(samples)"
+        }
+      ]
+    },
+    {
+      "from": "features",
+      "to": "prediction",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 4,
+          "exact": "prediction = linear(features, weights)"
+        }
+      ]
+    },
+    {
+      "from": "weights",
+      "to": "prediction",
+      "relation": "uses",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 4,
+          "exact": "prediction = linear(features, weights)"
+        }
+      ]
+    },
+    {
+      "from": "prediction",
+      "to": "residual",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 5,
+          "exact": "residual = prediction - targets"
+        }
+      ]
+    },
+    {
+      "from": "targets",
+      "to": "residual",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 5,
+          "exact": "residual = prediction - targets"
+        }
+      ]
+    },
+    {
+      "from": "residual",
+      "to": "loss",
+      "relation": "feeds",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 6,
+          "exact": "loss = mean(residual * residual) + penalty * sum(weights * weights)"
+        }
+      ]
+    },
+    {
+      "from": "weights",
+      "to": "loss",
+      "relation": "uses",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 6,
+          "exact": "loss = mean(residual * residual) + penalty * sum(weights * weights)"
+        }
+      ]
+    },
+    {
+      "from": "penalty",
+      "to": "loss",
+      "relation": "uses",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 6,
+          "exact": "loss = mean(residual * residual) + penalty * sum(weights * weights)"
+        }
+      ]
+    },
+    {
+      "from": "residual",
+      "to": "score",
+      "relation": "evaluates",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 7,
+          "exact": "score = mean(abs(residual))"
+        }
+      ]
+    },
+    {
+      "from": "score",
+      "to": "metrics",
+      "relation": "produces",
+      "evidence": [
+        {
+          "file": "train.py",
+          "line": 8,
+          "exact": "save_metrics(score, \"results/metrics.json\")"
+        }
+      ]
+    }
+  ]
+}
