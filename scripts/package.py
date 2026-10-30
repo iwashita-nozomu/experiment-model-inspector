@@ -42,6 +42,7 @@ with zipfile.ZipFile(archive) as z:
     for manifest in ["plugin.json", ".codex-plugin/plugin.json", "mcp.json", ".mcp.json"]:
         json.loads(z.read("experiment-model-inspector/" + manifest))
     assert any("third-party/licenses/" in n for n in names)
+    assert "experiment-model-inspector/skills/inspect-experiment/references/experiment-selection.js" in names
 sha = hashlib.sha256(archive.read_bytes()).hexdigest()
 archive.with_suffix(".zip.sha256").write_text(sha + "  " + archive.name + "\n")
 print(archive.name + " " + sha)
