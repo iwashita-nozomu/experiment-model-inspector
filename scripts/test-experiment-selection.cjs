@@ -15,6 +15,7 @@ const candidate = JSON.parse(fs.readFileSync(path.join(root, fixture.candidate_f
 const source = fs.readFileSync(path.join(root, 'fixtures/semantic/no-manifest/train.py'), 'utf8');
 const plain = (v) => JSON.parse(JSON.stringify(v));
 const sha = (s) => createHash('sha256').update(s, 'utf8').digest('hex');
+const sourceLines = (s) => s.split(/\r?\n/); // Match Rust str::lines: no CRLF terminator in evidence.
 function run(args, input) {
   const r = spawnSync(binary, args, { input, encoding: 'utf8', timeout: 15000 });
   assert.equal(r.status, 0, r.stderr || r.error?.message);
@@ -79,7 +80,7 @@ test('node and edge selection are local; only explicit ask carries full immutabl
   assert.match(data.revision.sha256, /^[a-f0-9]{64}$/);
   assert.deepEqual(data.selection.candidate_ids, ['loss']);
   assert.deepEqual(data.selection.evidence.map((e) => e.line), [5, 6]);
-  for (const ref of data.selection.evidence) assert.equal(ref.sha256, sha(source.split('\n')[ref.line - 1]));
+  for (const ref of data.selection.evidence) assert.equal(ref.sha256, sha(sourceLines(source)[ref.line - 1]));
   assert.ok(!calls[0].prompt.includes('loss = mean('));
   assert.ok(Buffer.byteLength(JSON.stringify(data)) < 16384);
   const expected = fixture.selected_detail.edge;
@@ -151,7 +152,7 @@ test('canonical binding survives array reordering; exposed references cannot mut
 
 test('changed L1 evidence invalidates the previous view rather than attaching old meaning to new source', async () => {
   const changedSource = fs.readFileSync(path.join(root, fixture.changed_loss.source_file), 'utf8');
-  const changedCandidate = plain(candidate), lines = changedSource.split('\n');
+  const changedCandidate = plain(candidate), lines = sourceLines(changedSource);
   for (const item of [...changedCandidate.nodes, ...changedCandidate.edges]) for (const e of item.evidence) e.exact = lines[e.line - 1];
   const loss = changedCandidate.nodes.find((n) => n.id === 'loss');
   loss.label = fixture.changed_loss.meaning;
@@ -216,6 +217,17 @@ test('button wiring preserves in-graph meanings, selects without sending, then e
 test('digest-unavailable hosts require an explicit static/manual fallback, not an invented immutable revision', async () => {
   const unavailable = { TextEncoder }; vm.runInNewContext(helper, unavailable);
   await assert.rejects(unavailable.ExperimentSelection.create(view), /digest unavailable/);
+});
+
+test('LF and CRLF source yield the same literal evidence hashes and fixed view', async () => {
+  const lf = source.replace(/\r\n/g, '\n'), crlf = lf.replace(/\n/g, '\r\n');
+  const a = verify(lf), b = verify(crlf);
+  assert.equal(a.status, 'complete_for_declared_scope'); assert.equal(b.status, 'complete_for_declared_scope');
+  const left = await api.create({ ...view, report: a }, () => undefined);
+  const right = await api.create({ ...view, report: b }, () => undefined);
+  assert.equal(left.revision.sha256, right.revision.sha256); assert.equal(left.viewId, right.viewId);
+  left.select('node/loss'); right.select('node/loss');
+  assert.deepEqual(plain(left.selected()), plain(right.selected()));
 });
 
 test('state events cannot re-enable an in-flight ask or send a different selection', async () => {
