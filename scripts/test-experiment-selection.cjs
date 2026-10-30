@@ -127,8 +127,15 @@ test('state restoration rejects a different root, revision, meaning, unknown ID 
     (s) => { s.modelContent.revision.sha256 = '0'.repeat(64); },
     (s) => { s.modelContent.selection.id = 'node/unknown'; },
   ]) { const bad = plain(state); mutate(bad); assert.equal(c.restore(bad), null); }
-  const changed = plain(report); changed.nodes[0].label = 'Different proposed meaning';
-  assert.equal((await api.create({ ...view, report: changed }, () => ({ widgetState: state }))).selected(), null);
+  for (const mutate of [
+    (r) => { r.nodes[0].label = 'Different proposed meaning'; },
+    (r) => { r.nodes[0].metadata = { format: 'new candidate declaration' }; },
+    (r) => { r.nodes[0].basis = 'user_declared'; },
+    (r) => { r.interpretations[0].origin = 'manifest_author'; },
+  ]) {
+    const changed = plain(report); mutate(changed);
+    assert.equal((await api.create({ ...view, report: changed }, () => ({ widgetState: state }))).selected(), null);
+  }
 });
 
 test('canonical binding survives array reordering; exposed references cannot mutate the internal binding', async () => {

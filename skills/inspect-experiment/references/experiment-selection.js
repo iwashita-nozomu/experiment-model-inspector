@@ -56,7 +56,8 @@
         || !kinds.includes(node.kind) || typeof node.label !== 'string' || encoder.encode(node.label).length > 160) invalid();
       const refs = await references(node.evidence);
       targets.set('node/' + id, freeze({ id: 'node/' + id, kind: 'node', candidate_ids: [id], evidence: refs }));
-      nodes.push({ id, kind: node.kind, label: node.label, evidence: refs });
+      nodes.push({ id, kind: node.kind, label: node.label, basis: node.basis,
+        metadata: node.metadata, metadata_basis: node.metadata_basis, evidence: refs });
     }
     for (const edge of report.edges) {
       const from = candidateId(edge.from), to = candidateId(edge.to), relation = edge.relation;
@@ -78,7 +79,8 @@
         || !Number.isFinite(item.confidence) || item.confidence < 0 || item.confidence > 1
         || item.basis !== 'inferred' || item.mathematically_verified !== false
         || canonical(await references(item.evidence)) !== canonical(target.evidence)) invalid();
-      interpretations.push({ node, expression: item.expression, confidence: item.confidence });
+      interpretations.push({ node, expression: item.expression, confidence: item.confidence,
+        origin: item.origin, confidence_is_calibrated: item.confidence_is_calibrated });
     }
     // This revision covers only the supplied verified evidence, never the entire repo.
     const sort = (list) => list.sort(compare);
