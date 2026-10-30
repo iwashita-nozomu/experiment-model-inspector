@@ -23,7 +23,7 @@ Expected host reasoning, with the usual arithmetic interpretation marked inferre
 - Line 7 computes a mean absolute residual expression. This differs from the squared-error term in the loss. Explain that difference; do not call it the training loss.
 - Line 8 passes only `score` to `save_metrics`; there is no evidence that the loss is saved.
 - No optimizer or weights update is present. Explain a loss/evaluation computation, with training procedure unknown. Physical units, shape, noise distribution and data contents are unknown.
-- Build a candidate with evidence-linked input, preprocessing, model, residual, loss, score and output nodes. Verify it, then render the returned Mermaid graph. Give every nontrivial semantic claim a file:line reference and inferred/unknown qualification where needed.
+- Build a candidate with evidence-linked input, preprocessing, model, residual, loss, score and output nodes. Verify it, then render a native figure with short meanings and evidence inside it; the returned Mermaid is available for static output. Give every nontrivial semantic claim a file:line reference and inferred/unknown qualification where needed.
 
 ## Counterexample that must change the explanation
 
