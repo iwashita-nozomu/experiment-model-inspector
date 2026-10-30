@@ -2,6 +2,8 @@
 
 The preferred workflow is `observe_experiment_sources` → host GPT reasoning → `inspect_experiment_candidate` → concise meanings/evidence **inside a native figure** → user selection and explicit detail question → bounded selected-source re-observation. This is the default for an explicitly selected plugin's short request such as 「このレポを見て」 when the authorized root is clear; explicit user scope overrides it. It works without a manifest. Tools do not call each other, call GPT, maintain a database/cache, write reports, or execute source.
 
+This workflow requires the local MCP tools to be registered and approved in the executing session. The primary target is Work/Codex with the tools actually exposed. Ordinary Chat local marketplace/stdio exposure is unverified, and viewing another host's output supplies no tool capability. Visual display and the follow-up API are independent prerequisites for their respective UI features; the component API contract does not guarantee native-fragment messaging, so feature detection and manual fallback are required. Missing MCP stops new source reads; do not silently substitute CLI/filesystem/connectors. Existing evidence, static references and manual questions are scoped fallbacks, not fresh tool verification or proof of host support.
+
 ## observe_experiment_sources
 
 ```json
