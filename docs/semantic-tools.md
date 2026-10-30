@@ -34,3 +34,7 @@ experiment-model-inspector inspect-candidate ROOT < private-candidate.json
 The existing `inspect ROOT MANIFEST.json` path is compatible. `observe` currently accepts one range; MCP permits eight. All paths remain root-bounded. JSON-RPC invalid envelopes remain -32600; invalid tool argument shapes are -32602; domain failures use `isError: true` with a stable code. No errors echo rejected private root/source paths.
 
 See [the host GPT acceptance workflow](../skills/inspect-experiment/references/semantic-workflow.md) for source-specific expectations, a changed-loss counterexample, and safety/unknown requirements. Tests do not certify GPT prose quality or mathematical validity.
+
+## Native figure identity
+
+The declarative Mermaid projection uses `node_<candidate-id>` for verified nodes, with canonical node/edge ordering. Labels remain sanitized; source-mismatched nodes and their connected edges remain excluded. This lets the host connect a figure element to the same candidate ID and evidence when a label or array order changes. It adds no tool/schema fields, read permissions, layout engine or persistence. The host controls actual geometry and rendering; stable identifiers are not a guarantee of fixed screen positions or a native panel-patch API. Use the Skill's evidence captions and focused-follow-up guidance rather than embedding source or client behavior in raw HTML.

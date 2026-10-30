@@ -305,8 +305,9 @@ fn inspect_model(mut reader: Reader, m: Manifest, inline: bool) -> Result<Value,
     let mut observed = Vec::new();
     let mut inferred = Vec::new();
     let mut graph_ids = BTreeMap::new();
-    let mut mermaid = String::from("flowchart LR\n");
-    for (idx, n) in m.nodes.iter().enumerate() {
+    let mut diagram_nodes = BTreeMap::new();
+    let mut diagram_edges = Vec::new();
+    for n in &m.nodes {
         reader.check()?;
         if !id_ok(&n.id)
             || !ids.insert(n.id.clone())
@@ -336,7 +337,9 @@ fn inspect_model(mut reader: Reader, m: Manifest, inline: bool) -> Result<Value,
                 }
             }
         }
-        let gid = format!("n{idx}");
+        // Stable, safe names connect native figures to candidate/evidence IDs.
+        // The prefix also avoids Mermaid keywords such as a candidate ID "end".
+        let gid = format!("node_{}", n.id);
         graph_ids.insert(n.id.clone(), gid.clone());
         let label: String = format!("{}: {}", n.kind, n.label)
             .chars()
@@ -349,7 +352,7 @@ fn inspect_model(mut reader: Reader, m: Manifest, inline: bool) -> Result<Value,
                 }
             })
             .collect();
-        mermaid.push_str(&format!("  {gid}[\"{label}\"]\n"));
+        diagram_nodes.insert(n.id.clone(), format!("  {gid}[\"{label}\"]\n"));
         nodes.push(json!({"id":n.id,"kind":n.kind,"label":n.label,"basis":basis,"source_verified":true,"semantic_verification":"unknown","evidence":n.evidence,"metadata":n.metadata,"metadata_basis":metadata_basis}));
         for e in &n.evidence {
             observed.push(
@@ -374,7 +377,7 @@ fn inspect_model(mut reader: Reader, m: Manifest, inline: bool) -> Result<Value,
         }
         if let (Some(a), Some(b)) = (graph_ids.get(&e.from), graph_ids.get(&e.to)) {
             if verified(&e.evidence, &sources) {
-                mermaid.push_str(&format!("  {a} -->|{}| {b}\n", e.relation));
+                diagram_edges.push(format!("  {a} -->|{}| {b}\n", e.relation));
                 edges.push(json!({"from":e.from,"to":e.to,"relation":e.relation,"basis":basis,"source_verified":true,"semantic_verification":"unknown","evidence":e.evidence}));
             } else {
                 issues.push(json!({"code":"edge_evidence_mismatch","from":e.from,"to":e.to}));
@@ -382,6 +385,16 @@ fn inspect_model(mut reader: Reader, m: Manifest, inline: bool) -> Result<Value,
         } else {
             issues.push(json!({"code":"unverified_edge_endpoint","from":e.from,"to":e.to}));
         }
+    }
+    // Equivalent candidate orderings produce the same declarative figure.
+    // Layout remains the native renderer's job; this does not fix screen positions.
+    let mut mermaid = String::from("flowchart LR\n");
+    for line in diagram_nodes.values() {
+        mermaid.push_str(line);
+    }
+    diagram_edges.sort();
+    for line in diagram_edges {
+        mermaid.push_str(&line);
     }
     let complete = issues.is_empty();
     Ok(json!({

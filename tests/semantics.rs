@@ -46,6 +46,96 @@ fn candidate(observed: &Value, expression: &str) -> Value {
     json!({"version":1,"sources":["model.py"],"nodes":[{"id":"loss","kind":"loss","label":"Candidate objective","evidence":evidence,"interpretation":{"expression":expression,"confidence":0.7}}],"edges":[]})
 }
 
+fn figure_candidate(observed: &Value) -> Value {
+    let mut proposed = candidate(observed, "Candidate objective (inferred)");
+    let line = |number| {
+        observed["files"][0]["lines"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|line| line["line"] == number)
+            .unwrap()["text"]
+            .clone()
+    };
+    proposed["nodes"].as_array_mut().unwrap().extend([
+        json!({"id":"end","kind":"variable","label":"Residual","evidence":[{"file":"model.py","line":5,"exact":line(5)}]}),
+        json!({"id":"weights","kind":"parameter","label":"Weights role inferred","evidence":[{"file":"model.py","line":4,"exact":line(4)}]}),
+    ]);
+    proposed["edges"] = json!([
+        {"from":"end","to":"loss","relation":"feeds","evidence":[{"file":"model.py","line":6,"exact":line(6)}]},
+        {"from":"weights","to":"loss","relation":"uses","evidence":[{"file":"model.py","line":6,"exact":line(6)}]},
+    ]);
+    proposed
+}
+
+#[test]
+fn native_figure_is_canonical_without_reordering_json_declarations() {
+    let root = Root::new(include_str!("../fixtures/semantic/no-manifest/train.py"));
+    let observed = root.slice(1, 8).unwrap();
+    let proposed = figure_candidate(&observed);
+    let original = inspect_candidate(&root.0, proposed.clone()).unwrap();
+    let mut reordered = proposed;
+    reordered["nodes"].as_array_mut().unwrap().reverse();
+    reordered["edges"].as_array_mut().unwrap().reverse();
+    let reordered = inspect_candidate(&root.0, reordered).unwrap();
+    assert_eq!(original["diagram"]["text"], reordered["diagram"]["text"]);
+    assert_ne!(original["nodes"][0]["id"], reordered["nodes"][0]["id"]);
+    assert_ne!(original["edges"][0]["from"], reordered["edges"][0]["from"]);
+    let diagram = original["diagram"]["text"].as_str().unwrap();
+    assert!(
+        diagram.contains("node_end["),
+        "reserved words need a safe prefix"
+    );
+    assert!(diagram.contains("node_loss["));
+    assert!(diagram.contains("node_weights -->|uses| node_loss"));
+}
+
+#[test]
+fn figure_evidence_identity_survives_label_edits_and_excludes_stale_nodes() {
+    let source = include_str!("../fixtures/semantic/no-manifest/train.py");
+    let root = Root::new(source);
+    let observed = root.slice(1, 8).unwrap();
+    let mut proposed = figure_candidate(&observed);
+    let original = inspect_candidate(&root.0, proposed.clone()).unwrap();
+    proposed["nodes"][0]["label"] = json!("Reworded objective inferred");
+    let reworded = inspect_candidate(&root.0, proposed.clone()).unwrap();
+    assert!(
+        reworded["diagram"]["text"]
+            .as_str()
+            .unwrap()
+            .contains("node_loss[\"loss: Reworded objective inferred\"]")
+    );
+    assert_eq!(original["nodes"][0]["id"], reworded["nodes"][0]["id"]);
+    assert_eq!(
+        original["nodes"][0]["evidence"],
+        reworded["nodes"][0]["evidence"]
+    );
+    assert_eq!(reworded["nodes"][0]["semantic_verification"], "unknown");
+
+    fs::write(
+        root.0.join("model.py"),
+        source.replace("residual * residual", "abs(residual)"),
+    )
+    .unwrap();
+    let stale = inspect_candidate(&root.0, proposed).unwrap();
+    assert_eq!(stale["status"], "partial");
+    let diagram = stale["diagram"]["text"].as_str().unwrap();
+    assert!(!diagram.contains("node_loss"));
+    assert!(
+        !diagram.contains("-->"),
+        "no edge may cite an excluded node"
+    );
+    assert!(diagram.contains("node_end["));
+    assert!(diagram.contains("node_weights["));
+    assert!(
+        stale["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|issue| issue["code"] == "evidence_mismatch" && issue["node"] == "loss")
+    );
+}
+
 #[test]
 fn no_manifest_observe_candidate_verify_is_read_only_and_preserves_provenance() {
     let source = include_str!("../fixtures/semantic/no-manifest/train.py");
