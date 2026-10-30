@@ -1,6 +1,6 @@
 # Source observation and host GPT semantics
 
-The preferred workflow is `observe_experiment_sources` → host GPT reasoning → `inspect_experiment_candidate` → native diagram and explanation. It works without a pre-existing manifest. Tools do not call each other, call GPT, maintain a database/cache, write reports, or execute source.
+The preferred workflow is `observe_experiment_sources` → host GPT reasoning → `inspect_experiment_candidate` → concise meanings/evidence **inside a native figure** → user selection and explicit detail question → bounded selected-source re-observation. This is the default for an explicitly selected plugin's short request such as 「このレポを見て」 when the authorized root is clear; explicit user scope overrides it. It works without a manifest. Tools do not call each other, call GPT, maintain a database/cache, write reports, or execute source.
 
 ## observe_experiment_sources
 
@@ -37,4 +37,8 @@ See [the host GPT acceptance workflow](../skills/inspect-experiment/references/s
 
 ## Native figure identity
 
-The declarative Mermaid projection uses `node_<candidate-id>` for verified nodes, with canonical node/edge ordering. Labels remain sanitized; source-mismatched nodes and their connected edges remain excluded. This lets the host connect a figure element to the same candidate ID and evidence when a label or array order changes. It adds no tool/schema fields, read permissions, layout engine or persistence. The host controls actual geometry and rendering; stable identifiers are not a guarantee of fixed screen positions or a native panel-patch API. Use the Skill's evidence captions and focused-follow-up guidance rather than embedding source or client behavior in raw HTML.
+The static Mermaid projection uses `node_<candidate-id>` for verified nodes, with canonical node/edge ordering. Labels remain sanitized; source-mismatched nodes and their connected edges remain excluded. This connects a figure element to the same candidate ID and evidence when a label or array order changes. Mermaid IDs alone do not provide click-to-conversation behavior.
+
+For selected detail, the packaged Skill's standalone `experiment-selection.js` binds native node/edge buttons to returned candidate IDs, source file/line/SHA-256 references and a fixed **evidence-snapshot** revision. The digest covers supplied evidence only, not a complete repo revision; optional host Git SHA is metadata, not a Rust attestation. Selection is local; a separate ask button invokes the feature-detected host `sendFollowUpMessage({prompt,title})` contract, or shows a copyable reference-bearing question. The figure itself performs no source/tool/network reads. Host GPT matches the reference against the conversation and re-observes only the selected authorized scope. A stale binding requires confirmation, not a silent relink to new source.
+
+No tool/schema/read-permission changes, layout engine, runtime Node dependency, shared persistence or server are added. The host owns geometry and actual rendering. Offline fixtures prove reference/control behavior only; live GPT quality, native layout and real host clicks remain separate QA. See [the full workflow](../skills/inspect-experiment/references/semantic-workflow.md#native-presentation-and-focused-follow-ups) and the synthetic [short-request scenarios](examples/selection-scenarios.json).

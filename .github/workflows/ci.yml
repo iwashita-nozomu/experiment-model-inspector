@@ -33,6 +33,8 @@ jobs:
       - run: cargo +stable test --locked
       - run: cargo +stable build --release --locked
       - run: python scripts/smoke.py ${{ matrix.binary }}
+      - name: Offline native selection fixtures
+        run: node --test scripts/test-experiment-selection.cjs
       - run: python scripts/licenses.py
       - run: python scripts/package.py ${{ matrix.label }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
